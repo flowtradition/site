@@ -1,8 +1,16 @@
 import "../styles/globals.css";
+import { NextIntlProvider } from "next-intl";
+import { CookiesProvider } from "react-cookie";
 import type { AppProps /*, AppContext */ } from "next/app";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <NextIntlProvider messages={pageProps.messages}>
+      <CookiesProvider>
+        <Component {...pageProps} />
+      </CookiesProvider>
+    </NextIntlProvider>
+  );
 }
 
 // Only uncomment this method if you have blocking data requirements for
