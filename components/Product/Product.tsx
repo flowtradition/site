@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup } from "@headlessui/react";
 import { useCookies } from "react-cookie";
-import { classNames } from "../../utils/classNames";
+import { classNames } from "../../utils/class-names";
 import { ReferralCode } from "../ReferralCode/ReferralCode";
 import { REFERRAL_COOKIE_NAME } from "../../pages/store/[category]/[product]";
 import { useFormWithValidation } from "../../hooks/useFormWithValidation";

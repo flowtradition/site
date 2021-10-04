@@ -10,6 +10,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@directus/sdk": "^9.0.0-rc.95",
     "@headlessui/react": "^1.4.0",
     "@heroicons/react": "^1.0.4",
     "@tailwindcss/aspect-ratio": "^0.2.1",
@@ -21,6 +22,7 @@
     "libphonenumber-js": "^1.9.25",
     "next": "11.1.0",
     "next-intl": "^1.5.1",
+    "nprogress": "^0.2.0",
     "react": "17.0.2",
     "react-cookie": "^4.1.1",
     "react-dom": "17.0.2",
