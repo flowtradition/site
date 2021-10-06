@@ -1,13 +1,3 @@
-import { Category } from "./categories";
-
-export type PageCategory = {
-  readonly href: string;
-  readonly image: {
-    src: string;
-    alt: string;
-  };
-};
-
 export interface Page {
   readonly title: string;
   readonly metaDescription: string;
@@ -18,8 +8,20 @@ export interface IndexPage extends Page {
   readonly description: string;
 }
 
+export interface CategoryPage extends Page {
+  readonly heading: string;
+  readonly description: string;
+}
+
+export interface ProductPage extends Page {
+  readonly heading: string;
+  readonly description: string;
+}
+
 interface PageRepository {
   getIndexPage(): Promise<IndexPage>;
+  getCategoryPage(): Promise<CategoryPage>;
+  getProductPage(): Promise<ProductPage>;
 }
 
 export class InMemoryPageRepository implements PageRepository {
@@ -27,6 +29,13 @@ export class InMemoryPageRepository implements PageRepository {
 
   constructor(lang: string) {
     this.lang = lang;
+  }
+
+  getCategoryPage(): Promise<CategoryPage> {
+    throw new Error("Method not implemented.");
+  }
+  getProductPage(): Promise<ProductPage> {
+    throw new Error("Method not implemented.");
   }
 
   getIndexPage(): Promise<IndexPage> {

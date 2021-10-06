@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import NProgress from "nprogress";
 
@@ -8,7 +7,6 @@ export function useProgress() {
 
   useEffect(() => {
     const handleStart = (url) => {
-      console.log(`Loading: ${url}`);
       NProgress.start();
     };
     const handleStop = () => {

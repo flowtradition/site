@@ -55,7 +55,7 @@ export class InMemoryProductRepository implements ProductRepository {
         slug: "classic",
         categorySlug: "sadhu-bed-of-nails",
         price: "$120",
-        href: "#",
+        href: "classic",
         breadcrumbs: [{ id: 1, name: "Sadhu Bed of Nails", href: "#" }],
         mainImage: {
           src: "/content/bed/classic/main.jpg",
@@ -100,7 +100,7 @@ export class InMemoryProductRepository implements ProductRepository {
         slug: "octahedral",
         categorySlug: "sadhu-bed-of-nails",
         price: "$120",
-        href: "#",
+        href: "octahedral",
         breadcrumbs: [{ id: 1, name: "Sadhu Bed of Nails", href: "#" }],
         mainImage: {
           src: "/content/bed/classic/main.jpg",
@@ -142,7 +142,7 @@ export class InMemoryProductRepository implements ProductRepository {
         slug: "big-sadhu-set-for-the-back",
         categorySlug: "sadhu-bed-of-nails",
         price: "$170",
-        href: "#",
+        href: "big-sadhu-set-for-the-back",
         breadcrumbs: [{ id: 1, name: "Sadhu Bed of Nails", href: "#" }],
         mainImage: {
           src: "/content/bed/classic/main.jpg",
@@ -506,7 +506,7 @@ export class InMemoryProductRepository implements ProductRepository {
   }
 
   getProductBySlug(slug: string): Promise<Product> {
-    const product = this.items[this.lang].filter((product) => product.slug === slug);
+    const product = this.items[this.lang].filter((product) => product.slug === slug).shift();
 
     return Promise.resolve(product);
   }

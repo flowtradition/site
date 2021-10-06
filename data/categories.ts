@@ -1,20 +1,4 @@
-import bed from "../public/content/bed/classic/main.jpg";
-import carpet from "../public/content/carpet/classic/main.jpg";
-
-export const categories = {
-  en: {
-    heading: "Best Sadhu Bed of Nails",
-    description:
-      "Уникальные доски для поверхности спины, крестца и шеи. Терапевтическая садху-доска с гвоздями — идеальный\n          инструмент для глубокого расслабления, при болях в плечах и пояснице, интенсивных физических нагрузках, а\n          также в качестве духовной практики.",
-  },
-  ru: {
-    heading: "Лучшие доски садху с гвоздями",
-    description:
-      "Уникальные доски для поверхности спины, крестца и шеи. Терапевтическая садху-доска с гвоздями — идеальный\n          инструмент для глубокого расслабления, при болях в плечах и пояснице, интенсивных физических нагрузках, а\n          также в качестве духовной практики.",
-  },
-};
-
-type CategoryNavItem = {
+export type CategoryNavItem = {
   readonly slug: string;
   readonly name: string;
 };
@@ -47,7 +31,7 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
         title: "Best Sadhu Bed of Nails",
         description: "Best Sadhu Bed of Nails description",
         image: {
-          src: bed,
+          src: "/content/bed/classic/main.jpg",
           alt: "",
         },
       },
@@ -57,7 +41,7 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
         title: "Best Sadhu Carpet of Nails",
         description: "Best Sadhu Carpet of Nails description",
         image: {
-          src: carpet,
+          src: "/content/carpet/classic/main.jpg",
           alt: "",
         },
       },
@@ -80,7 +64,7 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
         description:
           "Уникальные доски для поверхности спины, крестца и шеи. Терапевтическая садху-доска с гвоздями — идеальный инструмент для глубокого расслабления, при болях в плечах и пояснице, интенсивных физических нагрузках, а также в качестве духовной практики.",
         image: {
-          src: bed,
+          src: "/content/bed/classic/main.jpg",
           alt: "",
         },
       },
@@ -90,7 +74,7 @@ export class InMemoryCategoriesRepository implements CategoriesRepository {
         title: "Лучшие ковры садху с гвоздями",
         description: "Уникальные ковры, описание",
         image: {
-          src: carpet,
+          src: "/content/carpet/classic/main.jpg",
           alt: "",
         },
       },

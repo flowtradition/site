@@ -1,17 +1,35 @@
-import { Layout } from "@/components/Layout/Layout";
-
+/* Vendor */
 import { GetStaticPropsContext } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Head from "next/head";
 
-import { Header } from "@/components/Header/Header";
-import { IndexPage, InMemoryPageRepository } from "../data/pages";
-import { Category, InMemoryCategoriesRepository } from "../data/categories";
+/* Components */
+import { Layout } from "@/components/Layout";
+import { Header } from "@/components/Header";
 
-const Home = ({ page, categories }: { page: IndexPage; categories: Category[] }) => {
+/* Utils */
+import { InMemoryPageRepository } from "@/data/pages";
+import { InMemoryCategoriesRepository } from "@/data/categories";
+
+/* Types */
+import type { IndexPage } from "@/data/pages";
+import type { Category, CategoryNavItem } from "@/data/categories";
+
+type Props = {
+  page: IndexPage;
+  categories: Category[];
+  navigation: CategoryNavItem[];
+};
+
+const Index = ({ page, categories, navigation }: Props) => {
   return (
     <Layout>
-      <Header />
+      <Head>
+        <title>{page.title}</title>
+        <meta name="description" content={page.metaDescription} />
+      </Head>
+      <Header navigation={navigation} />
       <main className="container mx-auto">
         <div className="relative bg-white overflow-hidden">
           <div className="py-12 sm:py-24">
@@ -22,7 +40,7 @@ const Home = ({ page, categories }: { page: IndexPage; categories: Category[] })
                     <li key={category.slug}>
                       <Link href={`/store/${category.slug}`} passHref>
                         <Image
-                          className="rounded-md max-w-7xl"
+                          className="rounded-md max-w-7xl cursor-pointer"
                           src={category.image.src}
                           alt={category.image.alt}
                           width={320}
@@ -47,13 +65,14 @@ const Home = ({ page, categories }: { page: IndexPage; categories: Category[] })
   );
 };
 
-export default Home;
+export default Index;
 
 export async function getStaticProps({ locale }: GetStaticPropsContext) {
   const pagesRepository = new InMemoryPageRepository(locale);
   const page = await pagesRepository.getIndexPage();
   const categoriesRepository = new InMemoryCategoriesRepository(locale);
   const categories = await categoriesRepository.getForIndexPage();
+  const navigation = await categoriesRepository.getNavigationItems();
 
   return {
     props: {
@@ -65,6 +84,7 @@ export async function getStaticProps({ locale }: GetStaticPropsContext) {
       },
       page,
       categories,
+      navigation,
     },
   };
 }

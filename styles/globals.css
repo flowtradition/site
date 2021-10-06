@@ -1,3 +1,4 @@
+@import "./nprogress.css";
 :root {
   --progress-color: #374151;
 }
@@ -5,4 +6,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "./nprogress.css";

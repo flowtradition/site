@@ -1,24 +1,9 @@
-import { Dialog, Popover, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import Link from "next/link";
+import { Dialog, Popover, Transition } from "@headlessui/react";
+import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher/LocaleSwitcher";
-import { useRouter } from "next/router";
-
-const nav = {
-  ru: {
-    pages: [
-      { name: "Доски садху с гвоздями", href: "/store/sadhu-bed-of-nails" },
-      { name: "Садху ковёр", href: "/store/sadhu-carpet-of-nails" },
-    ],
-  },
-  en: {
-    pages: [
-      { name: "Sadhu Bed of Nails", href: "/store/sadhu-bed-of-nails" },
-      { name: "Sadhu Carpet of Nails", href: "/store/sadhu-carpet-of-nails" },
-    ],
-  },
-};
+import { CategoryNavItem } from "@/data/categories";
 
 const Logo = () => (
   <div className="ml-4 flex lg:ml-0">
@@ -63,10 +48,12 @@ const Logo = () => (
   </div>
 );
 
-export const Header = () => {
+type Props = {
+  navigation: CategoryNavItem[];
+};
+
+export const Header = ({ navigation }: Props) => {
   const [open, setOpen] = useState(false);
-  const { locale } = useRouter();
-  const navigation = nav[locale];
 
   const openPopup = () => setOpen(true);
   const closePopup = () => setOpen(false);
@@ -108,10 +95,10 @@ export const Header = () => {
                 </button>
               </div>
               <div className="border-t border-gray-200 py-6 px-4 space-y-6">
-                {navigation.pages.map((page) => (
-                  <div key={page.name} className="flow-root">
-                    <Link href={page.href}>
-                      <a className="-m-2 p-2 block font-medium text-gray-900">{page.name}</a>
+                {navigation.map((item) => (
+                  <div key={item.slug} className="flow-root">
+                    <Link href={`/store/${item.slug}`}>
+                      <a className="-m-2 p-2 block font-medium text-gray-900">{item.name}</a>
                     </Link>
                   </div>
                 ))}
@@ -135,10 +122,10 @@ export const Header = () => {
               {/* Flyout menus */}
               <Popover.Group className="hidden lg:ml-8 lg:block lg:self-stretch">
                 <div className="h-full flex space-x-8">
-                  {navigation.pages.map((page) => (
-                    <Link key={page.name} href={page.href}>
+                  {navigation.map((item) => (
+                    <Link key={item.slug} href={`/store/${item.slug}`}>
                       <a className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800">
-                        {page.name}
+                        {item.name}
                       </a>
                     </Link>
                   ))}

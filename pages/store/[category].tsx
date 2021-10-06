@@ -1,16 +1,24 @@
+/* Vendor */
 import { GetStaticPathsContext, GetStaticPropsContext } from "next";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-import { Layout } from "@/components/Layout/Layout";
-import { categories, Category, InMemoryCategoriesRepository } from "../../data/categories";
-import { InMemoryProductRepository, ProductCategory } from "../../data/products";
-import { Header } from "@/components/Header/Header";
+/* Components */
+import { Layout } from "@/components/Layout";
+import { Header } from "@/components/Header";
 
-type Props = { products: Product[]; category: Category };
+/* Utils */
+import { InMemoryCategoriesRepository } from "@/data/categories";
+import { InMemoryProductRepository } from "@/data/products";
 
-const CategoryPage = ({ products, category }: Props) => {
+/* Types */
+import type { Category, CategoryNavItem } from "@/data/categories";
+import type { Product } from "@/data/products";
+
+type Props = { products: Product[]; category: Category; navigation: CategoryNavItem[] };
+
+const CategoryPage = ({ products, category, navigation }: Props) => {
   const router = useRouter();
   const t = useTranslations("Shared");
   const { isFallback } = router;
@@ -21,7 +29,7 @@ const CategoryPage = ({ products, category }: Props) => {
 
   return (
     <Layout>
-      <Header />
+      <Header navigation={navigation} />
       <main className="container mx-auto">
         <section className="bg-white">
           <div className="max-w-2xl mx-auto py-8 px-4 sm:py-12 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -42,7 +50,7 @@ const CategoryPage = ({ products, category }: Props) => {
                   <div className="mt-4 flex justify-between">
                     <div>
                       <h3 className="text-sm text-gray-700">
-                        <Link href={product.href}>
+                        <Link href={`/store/${product.categorySlug}/${product.slug}`}>
                           <a>
                             <span aria-hidden="true" className="absolute inset-0" />
                             {product.name}
@@ -89,13 +97,13 @@ export async function getStaticProps({ locale, params }: GetStaticPropsContext) 
   const products = await productsRepository.getProductsForCategory(categorySlug);
   const categoriesRepository = new InMemoryCategoriesRepository(locale);
   const category = await categoriesRepository.getCategoryBySlug(categorySlug);
-
-  console.log(category);
+  const navigation = await categoriesRepository.getNavigationItems();
 
   return {
     props: {
       products,
       category,
+      navigation,
       // You can get the messages from anywhere you like, but the recommended
       // pattern is to put them in JSON files separated by language and read
       // the desired one based on the `locale` received from Next.js.

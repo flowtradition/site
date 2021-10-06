@@ -1,6 +1,5 @@
 import "@/styles/globals.css";
 import { NextIntlProvider } from "next-intl";
-import { CookiesProvider } from "react-cookie";
 import type { AppProps /*, AppContext */ } from "next/app";
 import { useProgress } from "@/hooks/useProgress";
 
@@ -9,9 +8,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <NextIntlProvider messages={pageProps.messages}>
-      <CookiesProvider>
-        <Component {...pageProps} />
-      </CookiesProvider>
+      <Component {...pageProps} />
     </NextIntlProvider>
   );
 }
