@@ -1,9 +1,11 @@
+/* Vendor */
 import { Fragment, useState } from "react";
 import Link from "next/link";
 import { Dialog, Popover, Transition } from "@headlessui/react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher/LocaleSwitcher";
-import { CategoryNavItem } from "@/data/categories";
+
+/* Components */
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 const Logo = () => (
   <div className="ml-4 flex lg:ml-0">
@@ -48,11 +50,14 @@ const Logo = () => (
   </div>
 );
 
+/* Types */
+import type { NavItem } from "@/data/pages";
+
 type Props = {
-  navigation: CategoryNavItem[];
+  navigationItems: NavItem[];
 };
 
-export const Header = ({ navigation }: Props) => {
+export const Header = ({ navigationItems }: Props) => {
   const [open, setOpen] = useState(false);
 
   const openPopup = () => setOpen(true);
@@ -95,10 +100,10 @@ export const Header = ({ navigation }: Props) => {
                 </button>
               </div>
               <div className="border-t border-gray-200 py-6 px-4 space-y-6">
-                {navigation.map((item) => (
-                  <div key={item.slug} className="flow-root">
-                    <Link href={`/store/${item.slug}`}>
-                      <a className="-m-2 p-2 block font-medium text-gray-900">{item.name}</a>
+                {navigationItems.map((item) => (
+                  <div key={item.url} className="flow-root">
+                    <Link href={item.url}>
+                      <a className="-m-2 p-2 block font-medium text-gray-900">{item.title}</a>
                     </Link>
                   </div>
                 ))}
@@ -122,10 +127,10 @@ export const Header = ({ navigation }: Props) => {
               {/* Flyout menus */}
               <Popover.Group className="hidden lg:ml-8 lg:block lg:self-stretch">
                 <div className="h-full flex space-x-8">
-                  {navigation.map((item) => (
-                    <Link key={item.slug} href={`/store/${item.slug}`}>
+                  {navigationItems.map((item) => (
+                    <Link key={item.url} href={item.url}>
                       <a className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800">
-                        {item.name}
+                        {item.title}
                       </a>
                     </Link>
                   ))}
