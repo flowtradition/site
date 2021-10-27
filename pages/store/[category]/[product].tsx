@@ -3,48 +3,84 @@ import { useState } from "react";
 import { GetStaticPathsContext, GetStaticPropsContext } from "next";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { RadioGroup } from "@headlessui/react";
 
 /* Components */
 import { Layout } from "@/components/Layout";
 import { Header } from "@/components/Header";
+import { Option } from "@/components/Option/Option";
 import { ReferralCode } from "@/components/ReferralCode";
 
 /* Utils */
-import { InMemoryProductRepository } from "@/data/products";
-import { InMemoryCategoriesRepository } from "@/data/categories";
 import { classNames } from "@/utils/class-names";
 
 /* Types */
-import type { Product } from "@/data/products";
-import type { CategoryNavItem } from "@/data/categories";
+import {
+  ProductPage as ProductPageType,
+  StrapiApiRequest,
+  StrapiPageRepository,
+  StrapiSlugsRepository,
+} from "@/data/pages";
 
-type Props = { product: Product; navigation: CategoryNavItem[] };
+type Props = {
+  page: ProductPageType;
+};
 
-const ProductPage = ({ product, navigation }: Props) => {
+const ProductPage = ({ page }: Props) => {
   const router = useRouter();
   const { r } = router.query;
-
   const t = useTranslations("Product");
 
-  const [selectedSize, setSelectedSize] = useState(null);
-  const [fullName, setFullName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [price, setPrice] = useState(page.product.price);
 
-  const [isExists, setIsExists] = useState<boolean>(true);
-  const [referralCode, setReferralCode] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    deliveryAddress: "",
+    referralCode: "",
+  });
+  const [isExists, setIsExists] = useState<boolean>(!!formData.referralCode);
+  const [selectedOptions, setSelectedOptions] = useState(null);
+
+  console.log(selectedOptions);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevValue) => ({
+      ...prevValue,
+      [name]: value,
+    }));
+  };
+
+  const handleOptionChange = ({ id, name, value }) => {
+    console.log({ id, name, value });
+    if (value.price) {
+      setPrice(value.price);
+    }
+    setSelectedOptions((prevState) => {
+      return {
+        ...prevState,
+        [name]: value.name,
+      };
+    });
+  };
 
   const handleSubmit = (event): void => {
     event.preventDefault();
+    console.log(formData);
   };
 
   const isDisabled = false;
 
   return (
     <Layout>
-      <Header navigation={navigation} />
+      <Head>
+        <title>{page.title}</title>
+        <meta name="description" content={page.metaDescription} />
+      </Head>
+      <Header navigationItems={page.navigationItems} />
       <main className="container mx-auto">
         <section className="bg-white">
           <div className="max-w-2xl mx-auto py-4 px-4 sm:px-6 sm:py-6 lg:max-w-7xl lg:px-8 ">
@@ -55,7 +91,7 @@ const ProductPage = ({ product, navigation }: Props) => {
                     role="list"
                     className="max-w-2xl mx-auto px-4 flex items-center space-x-2 sm:px-6 lg:max-w-7xl lg:px-8"
                   >
-                    {product.breadcrumbs.map((breadcrumb) => (
+                    {page.breadcrumbs.map((breadcrumb) => (
                       <li key={breadcrumb.id}>
                         <div className="flex items-center">
                           <a href={breadcrumb.href} className="mr-2 text-sm font-medium text-gray-900">
@@ -76,7 +112,7 @@ const ProductPage = ({ product, navigation }: Props) => {
                       </li>
                     ))}
                     <li className="text-sm">
-                      <p className="font-medium text-gray-500">{product.name}</p>
+                      <p className="font-medium text-gray-500">{page.product.name}</p>
                     </li>
                   </ol>
                 </nav>
@@ -85,31 +121,31 @@ const ProductPage = ({ product, navigation }: Props) => {
                 <div className="mt-6 max-w-2xl mx-auto sm:px-6 lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-3 lg:gap-x-8">
                   <div className="hidden aspect-w-3 aspect-h-4 rounded-lg overflow-hidden lg:block">
                     <img
-                      src={product.images[0].src}
-                      alt={product.images[0].alt}
+                      src={page.images[0].src}
+                      alt={page.images[0].alt}
                       className="w-full h-full object-center object-cover"
                     />
                   </div>
                   <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
                     <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
                       <img
-                        src={product.images[1].src}
-                        alt={product.images[1].alt}
+                        src={page.images[1].src}
+                        alt={page.images[1].alt}
                         className="w-full h-full object-center object-cover"
                       />
                     </div>
                     <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
                       <img
-                        src={product.images[2].src}
-                        alt={product.images[2].alt}
+                        src={page.images[2].src}
+                        alt={page.images[2].alt}
                         className="w-full h-full object-center object-cover"
                       />
                     </div>
                   </div>
                   <div className="aspect-w-4 aspect-h-5 sm:rounded-lg sm:overflow-hidden lg:aspect-w-3 lg:aspect-h-4">
                     <img
-                      src={product.images[3].src}
-                      alt={product.images[3].alt}
+                      src={page.images[3].src}
+                      alt={page.images[3].alt}
                       className="w-full h-full object-center object-cover"
                     />
                   </div>
@@ -118,122 +154,80 @@ const ProductPage = ({ product, navigation }: Props) => {
                 {/* Product info */}
                 <div className="max-w-2xl mx-auto pt-10 pb-8 px-4 sm:px-6 lg:max-w-7xl lg:pt-16 lg:pb-16 lg:px-8 lg:grid lg:grid-cols-4 lg:grid-rows-[auto,auto,1fr] lg:gap-x-8">
                   <div className="lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
-                    <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">{product.name}</h1>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                      {page.product.name}
+                    </h1>
                   </div>
 
                   {/* Options */}
                   <div className="mt-4 lg:mt-0 lg:row-span-3 lg:col-span-2">
-                    <h2 className="sr-only">Product information</h2>
-                    <p className="text-3xl text-gray-900">{product.price}</p>
+                    <h2 className="sr-only">{t("Product Information")}</h2>
+                    <p className="text-3xl text-gray-900">
+                      {price} {t("Currency")}
+                    </p>
 
                     <form className="mt-10" onSubmit={handleSubmit} noValidate>
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm text-gray-900 font-medium">Step of nails (cm):</h3>
-                      </div>
-
-                      <RadioGroup value={selectedSize} onChange={setSelectedSize} className="my-4">
-                        <RadioGroup.Label className="sr-only">Choose a step of nails</RadioGroup.Label>
-                        <div className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-                          {product.sizes.map((size) => (
-                            <RadioGroup.Option
-                              key={size.name}
-                              value={size}
-                              disabled={!size.inStock}
-                              className={({ active }) =>
-                                classNames(
-                                  size.inStock
-                                    ? "bg-white shadow-sm text-gray-900 cursor-pointer"
-                                    : "bg-gray-50 text-gray-200 cursor-not-allowed",
-                                  active ? "ring-2 ring-indigo-500" : "",
-                                  "group relative border rounded-md py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6"
-                                )
-                              }
-                            >
-                              {({ active, checked }) => (
-                                <>
-                                  <RadioGroup.Label as="p">{size.name}</RadioGroup.Label>
-                                  {size.inStock ? (
-                                    <div
-                                      className={classNames(
-                                        active ? "border" : "border-2",
-                                        checked ? "border-indigo-500" : "border-transparent",
-                                        "absolute -inset-px rounded-md pointer-events-none"
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                  ) : (
-                                    <div
-                                      aria-hidden="true"
-                                      className="absolute -inset-px rounded-md border-2 border-gray-200 pointer-events-none"
-                                    >
-                                      <svg
-                                        className="absolute inset-0 w-full h-full text-gray-200 stroke-2"
-                                        viewBox="0 0 100 100"
-                                        preserveAspectRatio="none"
-                                        stroke="currentColor"
-                                      >
-                                        <line x1={0} y1={100} x2={100} y2={0} vectorEffect="non-scaling-stroke" />
-                                      </svg>
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </RadioGroup.Option>
-                          ))}
-                        </div>
-                      </RadioGroup>
+                      {page.product.options.map((option) => (
+                        <Option
+                          key={option.id}
+                          id={option.id}
+                          name={option.name}
+                          values={option.values}
+                          onChange={handleOptionChange}
+                        />
+                      ))}
 
                       <label className="block mb-4">
-                        <span className="text-gray-700">Full Name:</span>
+                        <span className="text-gray-700">{t("Full Name")}:</span>
                         <input
                           type="text"
                           name="fullName"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                           placeholder="John Doe"
                           required
-                          value={fullName}
-                          onChange={(event) => setFullName(event.target.value)}
+                          value={formData.fullName}
+                          onChange={handleChange}
                           maxLength={80}
                         />
                       </label>
 
                       <label className="block mb-4">
-                        <span className="text-gray-700">Email address:</span>
+                        <span className="text-gray-700">{t("E-mail Address")}:</span>
                         <input
                           type="email"
                           name="email"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                           placeholder="email@example.com"
                           required
-                          value={email}
-                          onChange={(event) => setEmail(event.target.value)}
+                          value={formData.email}
+                          onChange={handleChange}
                         />
                       </label>
 
                       <label className="block mb-4">
-                        <span className="text-gray-700">Phone Number:</span>
+                        <span className="text-gray-700">{t("Phone Number")}:</span>
                         <input
                           type="text"
                           name="phoneNumber"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                           placeholder="+7 (977) 789 12 34"
-                          value={phoneNumber}
-                          onChange={(event) => setPhoneNumber(event.target.value)}
+                          value={formData.phoneNumber}
+                          onChange={handleChange}
                         />
                       </label>
 
-                      <ReferralCode isExists={isExists} value={referralCode} onChange={setReferralCode} />
+                      <ReferralCode isExists={isExists} value={formData.referralCode} onChange={handleChange} />
 
                       <label className="block mb-4">
-                        <span className="text-gray-700">Address:</span>
+                        <span className="text-gray-700">{t("Delivery Address")}:</span>
                         <textarea
-                          name="address"
+                          name="deliveryAddress"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                           rows={3}
                           spellCheck="false"
                           required
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
+                          value={formData.deliveryAddress}
+                          onChange={handleChange}
                         />
                       </label>
 
@@ -254,10 +248,10 @@ const ProductPage = ({ product, navigation }: Props) => {
                   <div className="py-10 lg:pt-6 lg:pb-8 lg:col-start-1 lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
                     {/* Description and details */}
                     <div>
-                      <h3 className="sr-only">Description</h3>
+                      <h3 className="sr-only">{t("Specifications")}</h3>
 
                       <div className="space-y-6">
-                        <p className="text-base text-gray-900">{product.description}</p>
+                        <p className="text-base text-gray-900">{page.product.description}</p>
                       </div>
                     </div>
 
@@ -267,7 +261,7 @@ const ProductPage = ({ product, navigation }: Props) => {
                       </h2>
 
                       <dl className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-y-16 lg:gap-x-8">
-                        {product.features.map((feature) => (
+                        {page.product.features.map((feature) => (
                           <div key={feature.name} className="border-t border-gray-200 pt-4">
                             <dt className="font-medium text-gray-900">{feature.name}</dt>
                             <dd className="mt-2 text-sm text-gray-500">{feature.description}</dd>
@@ -288,21 +282,24 @@ const ProductPage = ({ product, navigation }: Props) => {
 
 export default ProductPage;
 
+const apiUrl = process.env.API_URL;
+const token = process.env.STRAPI_STATIC_TOKEN;
+
 // This function gets called at build time
 export async function getStaticPaths({ locales }: GetStaticPathsContext) {
   const paths = [];
 
   for (const locale of locales) {
-    const repository = new InMemoryCategoriesRepository(locale);
-    const categorySlugs = await repository.getSlugs();
-    const productRepository = new InMemoryProductRepository(locale);
+    const request = new StrapiApiRequest({
+      apiUrl,
+      locale,
+      token,
+    });
+    const repository = new StrapiSlugsRepository(request);
+    const slugs = await repository.getProductSlugs();
 
-    categorySlugs.forEach(async (slug) => {
-      const products = await productRepository.getProductsForCategory(slug);
-
-      products.forEach((product) => {
-        paths.push({ params: { product: product.slug, category: slug }, locale });
-      });
+    slugs.forEach(({ category, product }) => {
+      paths.push({ params: { product, category }, locale });
     });
   }
 
@@ -313,16 +310,19 @@ export async function getStaticPaths({ locales }: GetStaticPathsContext) {
 }
 
 export async function getStaticProps({ locale, params }: GetStaticPropsContext) {
-  const productRepository = new InMemoryProductRepository(locale);
-  const productSlug = params.product as string;
-  const product = await productRepository.getProductBySlug(productSlug);
+  const request = new StrapiApiRequest({
+    apiUrl,
+    locale,
+    token,
+  });
+  const pages = new StrapiPageRepository(request);
 
-  const categoriesRepository = new InMemoryCategoriesRepository(locale);
-  const navigation = await categoriesRepository.getNavigationItems();
+  const slug = params.product as string;
+  const page = await pages.getProductPage(slug);
 
   return {
     props: {
-      product,
+      page,
       // You can get the messages from anywhere you like, but the recommended
       // pattern is to put them in JSON files separated by language and read
       // the desired one based on the `locale` received from Next.js.
@@ -330,7 +330,6 @@ export async function getStaticProps({ locale, params }: GetStaticPropsContext) 
         ...require(`../../../messages/shared/${locale}.json`),
         ...require(`../../../messages/store/product/${locale}.json`),
       },
-      navigation,
     },
   };
 }
