@@ -1,6 +1,14 @@
 {
   "Product": {
     "Specifications": "Характеристики",
-    "Buy": "Купить"
+    "Product Information": "Информация о продукте",
+    "Buy": "Купить",
+    "Currency": "₽",
+    "Full Name": "Полное имя",
+    "E-mail Address": "Электронная почта",
+    "Phone Number": "Номер телефона",
+    "Referral Code": "Промокод",
+    "Where are you come from?": "Откуда к нам пришли?",
+    "Delivery Address": "Адрес доставки"
   }
 }
