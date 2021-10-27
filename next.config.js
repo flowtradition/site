@@ -4,6 +4,6 @@ module.exports = {
     defaultLocale: "ru",
   },
   images: {
-    domains: ["tailwindui.com"],
+    domains: ["cms.flowtradition.com"],
   },
 };
