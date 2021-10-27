@@ -1,24 +1,25 @@
 /* Vendor */
 import { GetStaticPathsContext, GetStaticPropsContext } from "next";
+import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 /* Components */
 import { Layout } from "@/components/Layout";
 import { Header } from "@/components/Header";
 
 /* Utils */
-import { InMemoryCategoriesRepository } from "@/data/categories";
-import { InMemoryProductRepository } from "@/data/products";
+import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@/data/pages";
 
 /* Types */
-import type { Category, CategoryNavItem } from "@/data/categories";
-import type { Product } from "@/data/products";
+import type { CategoryPage as CategoryPageType } from "@/data/pages";
 
-type Props = { products: Product[]; category: Category; navigation: CategoryNavItem[] };
+type Props = {
+  page: CategoryPageType;
+};
 
-const CategoryPage = ({ products, category, navigation }: Props) => {
+const CategoryPage = ({ page }: Props) => {
   const router = useRouter();
   const t = useTranslations("Shared");
   const { isFallback } = router;
@@ -29,28 +30,32 @@ const CategoryPage = ({ products, category, navigation }: Props) => {
 
   return (
     <Layout>
-      <Header navigation={navigation} />
+      <Head>
+        <title>{page.title}</title>
+        <meta name="description" content={page.metaDescription} />
+      </Head>
+      <Header navigationItems={page.navigationItems} />
       <main className="container mx-auto">
         <section className="bg-white">
           <div className="max-w-2xl mx-auto py-8 px-4 sm:py-12 sm:px-6 lg:max-w-7xl lg:px-8">
             <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl text-center mb-4">
-              {category.title}
+              {page.heading}
             </h1>
-            <p className="max-w-2xl mb-12 mx-auto text-center text-gray-600">{category.description}</p>
+            <p className="max-w-2xl mb-12 mx-auto text-center text-gray-600">{page.description}</p>
             <div className="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-              {products.map((product) => (
-                <div key={product.slug} className="group relative">
+              {page.categoryProducts.map((product) => (
+                <div key={product.href} className="group relative">
                   <div className="w-full min-h-80 bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none">
                     <img
-                      src={product.mainImage.src}
-                      alt={product.mainImage.alt}
+                      src={product.image.src}
+                      alt={product.image.alt}
                       className="w-full h-full object-center object-cover lg:w-full lg:h-full"
                     />
                   </div>
                   <div className="mt-4 flex justify-between">
                     <div>
                       <h3 className="text-sm text-gray-700">
-                        <Link href={`/store/${product.categorySlug}/${product.slug}`}>
+                        <Link href={product.href}>
                           <a>
                             <span aria-hidden="true" className="absolute inset-0" />
                             {product.name}
@@ -72,13 +77,21 @@ const CategoryPage = ({ products, category, navigation }: Props) => {
 
 export default CategoryPage;
 
+const apiUrl = process.env.API_URL;
+const token = process.env.STRAPI_STATIC_TOKEN;
+
 // This function gets called at build time
 export async function getStaticPaths({ locales }: GetStaticPathsContext) {
   const paths = [];
 
   for (const locale of locales) {
-    const repository = new InMemoryCategoriesRepository(locale);
-    const slugs = await repository.getSlugs();
+    const request = new StrapiApiRequest({
+      apiUrl,
+      locale,
+      token,
+    });
+    const repository = new StrapiSlugsRepository(request);
+    const slugs = await repository.getCategorySlugs();
 
     slugs.forEach((slug) => paths.push({ params: { category: slug }, locale }));
   }
@@ -91,19 +104,19 @@ export async function getStaticPaths({ locales }: GetStaticPathsContext) {
 
 // This also gets called at build time
 export async function getStaticProps({ locale, params }: GetStaticPropsContext) {
-  const productsRepository = new InMemoryProductRepository(locale);
+  const request = new StrapiApiRequest({
+    apiUrl,
+    locale,
+    token,
+  });
+  const pages = new StrapiPageRepository(request);
 
-  const categorySlug = params.category as string;
-  const products = await productsRepository.getProductsForCategory(categorySlug);
-  const categoriesRepository = new InMemoryCategoriesRepository(locale);
-  const category = await categoriesRepository.getCategoryBySlug(categorySlug);
-  const navigation = await categoriesRepository.getNavigationItems();
+  const slug = params.category as string;
+  const page = await pages.getCategoryPage(slug);
 
   return {
     props: {
-      products,
-      category,
-      navigation,
+      page,
       // You can get the messages from anywhere you like, but the recommended
       // pattern is to put them in JSON files separated by language and read
       // the desired one based on the `locale` received from Next.js.
