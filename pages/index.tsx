@@ -9,40 +9,36 @@ import { Layout } from "@/components/Layout";
 import { Header } from "@/components/Header";
 
 /* Utils */
-import { InMemoryPageRepository } from "@/data/pages";
-import { InMemoryCategoriesRepository } from "@/data/categories";
+import { StrapiApiRequest, StrapiPageRepository } from "@/data/pages";
 
 /* Types */
 import type { IndexPage } from "@/data/pages";
-import type { Category, CategoryNavItem } from "@/data/categories";
 
 type Props = {
   page: IndexPage;
-  categories: Category[];
-  navigation: CategoryNavItem[];
 };
 
-const Index = ({ page, categories, navigation }: Props) => {
+const HomePage = ({ page }: Props) => {
   return (
     <Layout>
       <Head>
         <title>{page.title}</title>
         <meta name="description" content={page.metaDescription} />
       </Head>
-      <Header navigation={navigation} />
+      <Header navigationItems={page.navigationItems} />
       <main className="container mx-auto">
         <div className="relative bg-white overflow-hidden">
           <div className="py-12 sm:py-24">
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 sm:static sm:flex lg:flex-col-reverse">
               <div className="mt-2 sm:mr-10 sm:mt-2 lg:mt-10 ">
                 <ul className="flex sm:flex-col lg:flex-row gap-10 mb-10">
-                  {categories.map((category) => (
-                    <li key={category.slug}>
-                      <Link href={`/store/${category.slug}`} passHref>
+                  {page.featuredItems.map((featuredItem) => (
+                    <li key={featuredItem.url}>
+                      <Link href={featuredItem.url} passHref>
                         <Image
                           className="rounded-md max-w-7xl cursor-pointer"
-                          src={category.image.src}
-                          alt={category.image.alt}
+                          src={featuredItem.image.src}
+                          alt={featuredItem.image.alt}
                           width={320}
                           height={320}
                         />
@@ -65,14 +61,18 @@ const Index = ({ page, categories, navigation }: Props) => {
   );
 };
 
-export default Index;
+export default HomePage;
 
 export async function getStaticProps({ locale }: GetStaticPropsContext) {
-  const pagesRepository = new InMemoryPageRepository(locale);
-  const page = await pagesRepository.getIndexPage();
-  const categoriesRepository = new InMemoryCategoriesRepository(locale);
-  const categories = await categoriesRepository.getForIndexPage();
-  const navigation = await categoriesRepository.getNavigationItems();
+  const apiUrl = process.env.API_URL;
+  const token = process.env.STRAPI_STATIC_TOKEN;
+  const request = new StrapiApiRequest({
+    apiUrl,
+    locale,
+    token,
+  });
+  const pages = new StrapiPageRepository(request);
+  const page = await pages.getIndexPage();
 
   return {
     props: {
@@ -83,8 +83,6 @@ export async function getStaticProps({ locale }: GetStaticPropsContext) {
         ...require(`../messages/shared/${locale}.json`),
       },
       page,
-      categories,
-      navigation,
     },
   };
 }
