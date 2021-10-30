@@ -5,10 +5,21 @@
     "Buy": "Заказать",
     "Currency": "₽",
     "Full Name": "Полное имя",
+    "Full Name Placeholder": "Иван Иванов",
+    "Full Name Description": "Нужно для того, чтобы отправить посылку",
     "E-mail Address": "Электронная почта",
+    "E-mail Address Description": "Чтобы выслать вам детали заказа",
     "Phone Number": "Номер телефона",
+    "Phone Number Placeholder": "Например, +7 999 999 99 99",
+    "Phone Number Description": "В международном формате, чтобы связаться с вами",
     "Referral Code": "Промокод",
-    "Where are you come from?": "Откуда к нам пришли?",
-    "Delivery Address": "Адрес доставки"
+    "Referral Code Placeholder": "Откуда узнали о нас?",
+    "Delivery Address": "Адрес доставки",
+    "Delivery Address Placeholder": "Полный почтовый адрес доставки",
+    "Delivery Address Description": "В международном формате, чтобы отправить посылку",
+    "Order completed": "Спасибо! Мы получили ваш заказ",
+    "Order completed Description": "Мы свяжемся с вами в ближайшее время",
+    "required": "не должно быть пустым",
+    "email": "должно быть действительным"
   }
 }
