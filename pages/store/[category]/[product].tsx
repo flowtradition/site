@@ -71,9 +71,26 @@ const ProductPage = ({ page }: Props) => {
     });
   };
 
-  const handleSubmit = (event): void => {
+  const handleSubmit = async (event): Promise<void> => {
     event.preventDefault();
     console.log(formData, selectedOptions);
+
+    const response = await fetch("/api/order", {
+      method: "POST",
+      body: JSON.stringify({
+        ...formData,
+        selectedOptions,
+        product: {
+          name: page.product.name,
+          price: page.product.price,
+          currency: t("Currency"),
+        },
+      }),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+    console.log(await response.json());
   };
 
   const isDisabled = false;
