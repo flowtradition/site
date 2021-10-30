@@ -1,8 +1,16 @@
-import "../styles/globals.css";
+import "@/styles/globals.css";
+import { NextIntlProvider } from "next-intl";
 import type { AppProps /*, AppContext */ } from "next/app";
+import { useProgress } from "@/hooks/useProgress";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  useProgress();
+
+  return (
+    <NextIntlProvider messages={pageProps.messages}>
+      <Component {...pageProps} />
+    </NextIntlProvider>
+  );
 }
 
 // Only uncomment this method if you have blocking data requirements for
