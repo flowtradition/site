@@ -4,8 +4,7 @@ const chatId = process.env.TELEGRAM_MESSAGE_TO;
 const bot = new Telegraf(botToken);
 
 export default async function handler(req, res) {
-  console.log(req.body);
-  const { product, fullName, email, phoneNumber, deliveryAddress, referralCode, selectedOptions } = req.body;
+  const { product, fullName, email, phoneNumber, deliveryAddress, referralCode, source, selectedOptions } = req.body;
   let options = "";
 
   for (const option in selectedOptions) {
@@ -21,7 +20,7 @@ ${options}
 От: <b>${fullName || ""}</b>
 E-mail: <b>${email || ""}</b>
 Номер телефона: <b>${phoneNumber || ""}</b>
-Откуда пришёл: <b>${referralCode || ""}</b>
+Откуда пришёл: <b>${referralCode || source || "Не заполнено"}</b>
 
 Адрес доставки: <b>${deliveryAddress || ""}</b>
 `;
