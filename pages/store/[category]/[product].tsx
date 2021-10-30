@@ -82,7 +82,7 @@ const ProductPage = ({ page }: Props) => {
         selectedOptions,
         product: {
           name: page.product.name,
-          price: page.product.price,
+          price,
           currency: t("Currency"),
         },
       }),
