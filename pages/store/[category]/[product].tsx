@@ -1,14 +1,16 @@
 /* Vendor */
-import { useState } from "react";
+import React, { useState } from "react";
 import { GetStaticPathsContext, GetStaticPropsContext } from "next";
 import { useTranslations } from "next-intl";
 import Head from "next/head";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 /* Components */
 import { Layout } from "@/components/Layout";
 import { Header } from "@/components/Header";
 import { Option } from "@/components/Option/Option";
-import { ReferralCode } from "@/components/ReferralCode";
 
 /* Utils */
 import { classNames } from "@/utils/class-names";
@@ -17,6 +19,17 @@ import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@
 /* Types */
 import type { ProductPage as ProductPageType } from "@/data/pages";
 import { useReferralCode } from "@/hooks/useReferralCode";
+import { Input } from "@/components/Input/Input";
+import { Textarea } from "@/components/Textarea/Textarea";
+import { Feedback } from "@/components/Feedback/Feedback";
+
+type FormData = {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  source?: string;
+  deliveryAddress: string;
+};
 
 type Props = {
   page: ProductPageType;
@@ -24,17 +37,9 @@ type Props = {
 
 const ProductPage = ({ page }: Props) => {
   const t = useTranslations("Product");
-
   const referralCode = useReferralCode();
   const [price, setPrice] = useState(page.product.price);
-
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    deliveryAddress: "",
-    referralCode,
-  });
+  const [formWasSent, setFormWasSent] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState(() =>
     page.product.options.reduce((prevOption, nextOption) => {
       // const key = nextOption.id; // with id
@@ -47,16 +52,6 @@ const ProductPage = ({ page }: Props) => {
       };
     }, {})
   );
-
-  // console.log(selectedOptions);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevValue) => ({
-      ...prevValue,
-      [name]: value,
-    }));
-  };
 
   const handleOptionChange = ({ id, name, value }) => {
     if (value.price) {
@@ -71,14 +66,31 @@ const ProductPage = ({ page }: Props) => {
     });
   };
 
-  const handleSubmit = async (event): Promise<void> => {
-    event.preventDefault();
-    console.log(formData, selectedOptions);
+  const schema = yup
+    .object({
+      fullName: yup.string().required(t("required") as string),
+      email: yup
+        .string()
+        .email(t("email") as string)
+        .required(t("required") as string),
+      phoneNumber: yup.string().required(t("required") as string),
+      deliveryAddress: yup.string().required(t("required") as string),
+    })
+    .required();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+  });
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     const response = await fetch("/api/order", {
       method: "POST",
       body: JSON.stringify({
-        ...formData,
+        ...data,
+        referralCode,
         selectedOptions,
         product: {
           name: page.product.name,
@@ -90,10 +102,11 @@ const ProductPage = ({ page }: Props) => {
         "Content-type": "application/json",
       },
     });
-    console.log(await response.json());
-  };
 
-  const isDisabled = false;
+    if (response.ok) {
+      setFormWasSent(true);
+    }
+  };
 
   return (
     <Layout>
@@ -182,90 +195,99 @@ const ProductPage = ({ page }: Props) => {
 
                   {/* Options */}
                   <div className="mt-4 lg:mt-0 lg:row-span-3 lg:col-span-2">
-                    <h2 className="sr-only">{t("Product Information")}</h2>
-                    <p className="text-3xl text-gray-900">
-                      {price} {t("Currency")}
-                    </p>
+                    {formWasSent ? (
+                      <Feedback title={t("Order completed")} description={t("Order completed" + " Description")} />
+                    ) : (
+                      <>
+                        <h2 className="sr-only">{t("Product Information")}</h2>
+                        <p className="text-3xl text-gray-900">
+                          {price} {t("Currency")}
+                        </p>
+                        <form className="mt-10" onSubmit={handleSubmit(onSubmit)}>
+                          {page.product.options.map((option) => (
+                            <Option
+                              key={option.id}
+                              id={option.id}
+                              name={option.name}
+                              values={option.values}
+                              onChange={handleOptionChange}
+                            />
+                          ))}
 
-                    <form className="mt-10" onSubmit={handleSubmit} noValidate>
-                      {page.product.options.map((option) => (
-                        <Option
-                          key={option.id}
-                          id={option.id}
-                          name={option.name}
-                          values={option.values}
-                          onChange={handleOptionChange}
-                        />
-                      ))}
+                          <Input
+                            className="mb-4"
+                            name="fullName"
+                            type="text"
+                            placeholder={t("Full Name Placeholder") as string}
+                            label={t("Full Name")}
+                            {...register("fullName")}
+                            errorMessage={errors.fullName?.message}
+                            description={t("Full Name Description") as string}
+                          />
 
-                      <label className="block mb-4">
-                        <span className="text-gray-700">{t("Full Name")}:</span>
-                        <input
-                          type="text"
-                          name="fullName"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                          placeholder="John Doe"
-                          required
-                          value={formData.fullName}
-                          onChange={handleChange}
-                          maxLength={80}
-                        />
-                      </label>
+                          <Input
+                            className="mb-4"
+                            name="email"
+                            type="email"
+                            placeholder="email@example.com"
+                            label={t("E-mail Address")}
+                            {...register("email")}
+                            errorMessage={errors.email?.message}
+                            description={t("E-mail Address Description") as string}
+                          />
 
-                      <label className="block mb-4">
-                        <span className="text-gray-700">{t("E-mail Address")}:</span>
-                        <input
-                          type="email"
-                          name="email"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                          placeholder="email@example.com"
-                          required
-                          value={formData.email}
-                          onChange={handleChange}
-                        />
-                      </label>
+                          <Input
+                            className="mb-4"
+                            name="phoneNumber"
+                            type="text"
+                            placeholder={t("Phone Number Placeholder") as string}
+                            label={t("Phone Number")}
+                            {...register("phoneNumber")}
+                            errorMessage={errors.phoneNumber?.message}
+                            description={t("Phone Number Description") as string}
+                          />
 
-                      <label className="block mb-4">
-                        <span className="text-gray-700">{t("Phone Number")}:</span>
-                        <input
-                          type="text"
-                          name="phoneNumber"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                          placeholder="+7 (977) 789 12 34"
-                          value={formData.phoneNumber}
-                          onChange={handleChange}
-                        />
-                      </label>
+                          {!referralCode && (
+                            <Input
+                              className="mb-4"
+                              name="source"
+                              type="text"
+                              placeholder={referralCode ? (t("Referral Code Placeholder") as string) : ""}
+                              label={
+                                referralCode
+                                  ? (t("Referral Code") as string)
+                                  : (t("Referral Code Placeholder") as string)
+                              }
+                              {...register("source")}
+                              errorMessage={errors.source?.message}
+                            />
+                          )}
 
-                      <div className={`${referralCode ? "hidden" : ""}`}>
-                        <ReferralCode value={formData.referralCode} onChange={handleChange} />
-                      </div>
+                          <Textarea
+                            className="mb-4"
+                            name="deliveryAddress"
+                            placeholder={t("Delivery Address Placeholder") as string}
+                            label={t("Delivery Address")}
+                            {...register("deliveryAddress", { required: true })}
+                            errorMessage={errors.deliveryAddress?.message}
+                            description={t("Delivery Address Description") as string}
+                            rows={3}
+                            spellCheck={false}
+                          />
 
-                      <label className="block mb-4">
-                        <span className="text-gray-700">{t("Delivery Address")}:</span>
-                        <textarea
-                          name="deliveryAddress"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                          rows={3}
-                          spellCheck="false"
-                          required
-                          value={formData.deliveryAddress}
-                          onChange={handleChange}
-                        />
-                      </label>
-
-                      <button
-                        type="submit"
-                        disabled={isDisabled}
-                        className={classNames(
-                          "mt-10 w-full border border-transparent rounded-md py-3 px-8 flex items-center",
-                          "justify-center text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-                          isDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-                        )}
-                      >
-                        {t("Buy")}
-                      </button>
-                    </form>
+                          <button
+                            type="submit"
+                            className={classNames(
+                              "mt-10 w-full border border-transparent rounded-md py-3 px-8 flex items-center",
+                              "justify-center text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                              "bg-indigo-600 hover:bg-indigo-700"
+                            )}
+                          >
+                            {t("Buy")}
+                          </button>
+                        </form>
+                      </>
+                    )}
                   </div>
 
                   <div className="py-10 lg:pt-6 lg:pb-8 lg:col-start-1 lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
