@@ -1,11 +1,7 @@
-import { ChangeEvent } from "react";
 import { useTranslations } from "next-intl";
 
-export const ReferralCode = ({ value, onChange, isExists }) => {
+export const ReferralCode = ({ value, onChange }) => {
   const t = useTranslations("Product");
-  if (isExists) {
-    return <input type="text" name="referralCode" className="hidden" defaultValue={value} />;
-  }
 
   return (
     <label className="block mb-4">

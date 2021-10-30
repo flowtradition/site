@@ -2,9 +2,7 @@
 import { useState } from "react";
 import { GetStaticPathsContext, GetStaticPropsContext } from "next";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/router";
 import Head from "next/head";
-import { RadioGroup } from "@headlessui/react";
 
 /* Components */
 import { Layout } from "@/components/Layout";
@@ -14,24 +12,20 @@ import { ReferralCode } from "@/components/ReferralCode";
 
 /* Utils */
 import { classNames } from "@/utils/class-names";
+import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@/data/pages";
 
 /* Types */
-import {
-  ProductPage as ProductPageType,
-  StrapiApiRequest,
-  StrapiPageRepository,
-  StrapiSlugsRepository,
-} from "@/data/pages";
+import type { ProductPage as ProductPageType } from "@/data/pages";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
 type Props = {
   page: ProductPageType;
 };
 
 const ProductPage = ({ page }: Props) => {
-  const router = useRouter();
-  const { r } = router.query;
   const t = useTranslations("Product");
 
+  const referralCode = useReferralCode();
   const [price, setPrice] = useState(page.product.price);
 
   const [formData, setFormData] = useState({
@@ -39,12 +33,22 @@ const ProductPage = ({ page }: Props) => {
     email: "",
     phoneNumber: "",
     deliveryAddress: "",
-    referralCode: "",
+    referralCode,
   });
-  const [isExists, setIsExists] = useState<boolean>(!!formData.referralCode);
-  const [selectedOptions, setSelectedOptions] = useState(null);
+  const [selectedOptions, setSelectedOptions] = useState(() =>
+    page.product.options.reduce((prevOption, nextOption) => {
+      // const key = nextOption.id; // with id
+      const key = nextOption.name; // with name
 
-  console.log(selectedOptions);
+      return {
+        ...prevOption,
+        // [key]: nextOption.values[0].id, // with id
+        [key]: nextOption.values[0].name, // with name
+      };
+    }, {})
+  );
+
+  // console.log(selectedOptions);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,21 +59,21 @@ const ProductPage = ({ page }: Props) => {
   };
 
   const handleOptionChange = ({ id, name, value }) => {
-    console.log({ id, name, value });
     if (value.price) {
       setPrice(value.price);
     }
     setSelectedOptions((prevState) => {
       return {
         ...prevState,
-        [name]: value.name,
+        // [id]: value.id, // with id
+        [name]: value.name, // with name
       };
     });
   };
 
   const handleSubmit = (event): void => {
     event.preventDefault();
-    console.log(formData);
+    console.log(formData, selectedOptions);
   };
 
   const isDisabled = false;
@@ -216,7 +220,9 @@ const ProductPage = ({ page }: Props) => {
                         />
                       </label>
 
-                      <ReferralCode isExists={isExists} value={formData.referralCode} onChange={handleChange} />
+                      <div className={`${referralCode ? "hidden" : ""}`}>
+                        <ReferralCode value={formData.referralCode} onChange={handleChange} />
+                      </div>
 
                       <label className="block mb-4">
                         <span className="text-gray-700">{t("Delivery Address")}:</span>
