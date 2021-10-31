@@ -97,6 +97,7 @@ interface PageRepository {
 
 type StrapiImage = {
   alternativeText: string;
+  url: string;
   formats: {
     small: {
       url: string;
@@ -245,8 +246,6 @@ export class StrapiPageRepository implements PageRepository {
     });
     const data = response.shift();
 
-    data.options.map((option) => console.log(option));
-
     const { title, meta_description } = data;
     const page = {
       title: title,
@@ -291,11 +290,10 @@ export class StrapiPageRepository implements PageRepository {
       options,
       features,
     };
-    // console.log(product);
     const breadcrumbs: Breadcrumb[] = [];
     const images: ProductImage[] = data.images.map((image) => {
       return {
-        src: `${this.request.apiUrl}${image.formats.medium.url}`,
+        src: `${this.request.apiUrl}${image.url}`,
         alt: image.alternativeText,
       };
     });
