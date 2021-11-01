@@ -13,18 +13,31 @@ import { StrapiApiRequest, StrapiPageRepository } from "@/data/pages";
 
 /* Types */
 import type { IndexPage } from "@/data/pages";
+import { Alert } from "@/components/Alert/Alert";
 
 type Props = {
   page: IndexPage;
+  preview?: boolean;
 };
 
-const HomePage = ({ page }: Props) => {
+const HomePage = ({ page, preview }: Props) => {
   return (
     <Layout>
       <Head>
         <title>{page.title}</title>
         <meta name="description" content={page.metaDescription} />
       </Head>
+      {preview && (
+        <div className="p-4">
+          <Alert
+            title="Включен режим предпросмотра"
+            link={{
+              href: "/api/exit-preview",
+              text: "Нажмите сюда, чтобы выйти",
+            }}
+          />
+        </div>
+      )}
       <Header navigationItems={page.navigationItems} />
       <main className="container mx-auto">
         <div className="relative bg-white overflow-hidden">
@@ -63,8 +76,8 @@ const HomePage = ({ page }: Props) => {
 
 export default HomePage;
 
-export async function getStaticProps({ locale }: GetStaticPropsContext) {
-  const apiUrl = process.env.API_URL;
+export async function getStaticProps({ locale, preview }: GetStaticPropsContext) {
+  const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
   const token = process.env.STRAPI_STATIC_TOKEN;
   const request = new StrapiApiRequest({
     apiUrl,
@@ -83,6 +96,7 @@ export async function getStaticProps({ locale }: GetStaticPropsContext) {
         ...require(`../messages/shared/${locale}.json`),
       },
       page,
+      preview: preview ?? false,
     },
   };
 }

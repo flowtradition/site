@@ -22,6 +22,7 @@ import { useReferralCode } from "@/hooks/useReferralCode";
 import { Input } from "@/components/Input/Input";
 import { Textarea } from "@/components/Textarea/Textarea";
 import { Feedback } from "@/components/Feedback/Feedback";
+import { Alert } from "@/components/Alert/Alert";
 
 type FormData = {
   fullName: string;
@@ -33,9 +34,10 @@ type FormData = {
 
 type Props = {
   page: ProductPageType;
+  preview?: boolean;
 };
 
-const ProductPage = ({ page }: Props) => {
+const ProductPage = ({ page, preview }: Props) => {
   const t = useTranslations("Product");
   const referralCode = useReferralCode();
   const [price, setPrice] = useState(page.product.price);
@@ -114,6 +116,17 @@ const ProductPage = ({ page }: Props) => {
         <title>{page.title}</title>
         <meta name="description" content={page.metaDescription} />
       </Head>
+      {preview && (
+        <div className="p-4">
+          <Alert
+            title="Включен режим предпросмотра"
+            link={{
+              href: "/api/exit-preview",
+              text: "Нажмите сюда, чтобы выйти",
+            }}
+          />
+        </div>
+      )}
       <Header navigationItems={page.navigationItems} />
       <main className="container mx-auto">
         <section className="bg-white">
@@ -327,7 +340,7 @@ const ProductPage = ({ page }: Props) => {
 
 export default ProductPage;
 
-const apiUrl = process.env.API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 const token = process.env.STRAPI_STATIC_TOKEN;
 
 // This function gets called at build time
@@ -354,7 +367,7 @@ export async function getStaticPaths({ locales }: GetStaticPathsContext) {
   };
 }
 
-export async function getStaticProps({ locale, params }: GetStaticPropsContext) {
+export async function getStaticProps({ locale, params, preview }: GetStaticPropsContext) {
   const request = new StrapiApiRequest({
     apiUrl,
     locale,
@@ -375,6 +388,7 @@ export async function getStaticProps({ locale, params }: GetStaticPropsContext) 
         ...require(`../../../messages/shared/${locale}.json`),
         ...require(`../../../messages/store/product/${locale}.json`),
       },
+      preview: preview ?? false,
     },
   };
 }
