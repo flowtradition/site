@@ -14,12 +14,14 @@ import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@
 
 /* Types */
 import type { CategoryPage as CategoryPageType } from "@/data/pages";
+import { Alert } from "@/components/Alert/Alert";
 
 type Props = {
   page: CategoryPageType;
+  preview?: boolean;
 };
 
-const CategoryPage = ({ page }: Props) => {
+const CategoryPage = ({ page, preview }: Props) => {
   const router = useRouter();
   const t = useTranslations("Shared");
   const { isFallback } = router;
@@ -34,6 +36,17 @@ const CategoryPage = ({ page }: Props) => {
         <title>{page.title}</title>
         <meta name="description" content={page.metaDescription} />
       </Head>
+      {preview && (
+        <div className="p-4">
+          <Alert
+            title="Включен режим предпросмотра"
+            link={{
+              href: "/api/exit-preview",
+              text: "Нажмите сюда, чтобы выйти",
+            }}
+          />
+        </div>
+      )}
       <Header navigationItems={page.navigationItems} />
       <main className="container mx-auto">
         <section className="bg-white">
@@ -77,7 +90,7 @@ const CategoryPage = ({ page }: Props) => {
 
 export default CategoryPage;
 
-const apiUrl = process.env.API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 const token = process.env.STRAPI_STATIC_TOKEN;
 
 // This function gets called at build time
@@ -103,7 +116,7 @@ export async function getStaticPaths({ locales }: GetStaticPathsContext) {
 }
 
 // This also gets called at build time
-export async function getStaticProps({ locale, params }: GetStaticPropsContext) {
+export async function getStaticProps({ locale, params, preview }: GetStaticPropsContext) {
   const request = new StrapiApiRequest({
     apiUrl,
     locale,
@@ -123,6 +136,7 @@ export async function getStaticProps({ locale, params }: GetStaticPropsContext) 
       messages: {
         ...require(`../../messages/shared/${locale}.json`),
       },
+      preview: preview ?? false,
     },
   };
 }
