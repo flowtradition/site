@@ -1,5 +1,5 @@
 /* Vendor */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GetStaticPathsContext, GetStaticPropsContext } from "next";
 import { useTranslations } from "next-intl";
 import Head from "next/head";
@@ -35,9 +35,10 @@ type FormData = {
 type Props = {
   page: ProductPageType;
   preview?: boolean;
+  locale?: string;
 };
 
-const ProductPage = ({ page, preview }: Props) => {
+const ProductPage = ({ page, preview, locale }: Props) => {
   const t = useTranslations("Product");
   const referralCode = useReferralCode();
   const [price, setPrice] = useState(page.product.price);
@@ -110,6 +111,10 @@ const ProductPage = ({ page, preview }: Props) => {
     }
   };
 
+  useEffect(() => {
+    setPrice(page.product.price);
+  }, [locale]);
+
   return (
     <Layout>
       <Head>
@@ -133,37 +138,6 @@ const ProductPage = ({ page, preview }: Props) => {
           <div className="max-w-2xl mx-auto py-4 px-4 sm:px-6 sm:py-6 lg:max-w-7xl lg:px-8 ">
             <div className="bg-white">
               <div className="pt-6">
-                <nav aria-label="Breadcrumb">
-                  <ol
-                    role="list"
-                    className="max-w-2xl mx-auto px-4 flex items-center space-x-2 sm:px-6 lg:max-w-7xl lg:px-8"
-                  >
-                    {page.breadcrumbs.map((breadcrumb) => (
-                      <li key={breadcrumb.id}>
-                        <div className="flex items-center">
-                          <a href={breadcrumb.href} className="mr-2 text-sm font-medium text-gray-900">
-                            {breadcrumb.name}
-                          </a>
-                          <svg
-                            width={16}
-                            height={20}
-                            viewBox="0 0 16 20"
-                            fill="currentColor"
-                            xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true"
-                            className="w-4 h-5 text-gray-300"
-                          >
-                            <path d="M5.697 4.34L8.98 16.532h1.327L7.025 4.341H5.697z" />
-                          </svg>
-                        </div>
-                      </li>
-                    ))}
-                    <li className="text-sm">
-                      <p className="font-medium text-gray-500">{page.product.name}</p>
-                    </li>
-                  </ol>
-                </nav>
-
                 {/* Image gallery */}
                 <div className="mt-6 max-w-2xl mx-auto sm:px-6 lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-3 lg:gap-x-8">
                   <div className="hidden aspect-w-3 aspect-h-4 rounded-lg overflow-hidden lg:block">
@@ -356,8 +330,8 @@ export async function getStaticPaths({ locales }: GetStaticPathsContext) {
     const repository = new StrapiSlugsRepository(request);
     const slugs = await repository.getProductSlugs();
 
-    slugs.forEach(({ category, product }) => {
-      paths.push({ params: { product, category }, locale });
+    slugs.forEach(({ product }) => {
+      paths.push({ params: { product }, locale });
     });
   }
 
@@ -382,10 +356,11 @@ export async function getStaticProps({ locale, params, preview }: GetStaticProps
     props: {
       page,
       messages: {
-        ...require(`../../../messages/shared/${locale}.json`),
-        ...require(`../../../messages/store/product/${locale}.json`),
+        ...require(`@/messages/shared/${locale}.json`),
+        ...require(`@/messages/store/product/${locale}.json`),
       },
       preview: preview ?? false,
+      locale,
     },
   };
 }

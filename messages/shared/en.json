@@ -1,5 +1,7 @@
 {
   "Shared": {
-    "Loading...": "Loading..."
+    "Loading...": "Loading...",
+    "Shop": "Shop",
+    "Currency": "$"
   }
 }

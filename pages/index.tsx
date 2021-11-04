@@ -14,6 +14,7 @@ import { StrapiApiRequest, StrapiPageRepository } from "@/data/pages";
 /* Types */
 import type { IndexPage } from "@/data/pages";
 import { Alert } from "@/components/Alert/Alert";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
 type Props = {
   page: IndexPage;
@@ -21,6 +22,8 @@ type Props = {
 };
 
 const HomePage = ({ page, preview }: Props) => {
+  useReferralCode();
+
   return (
     <Layout>
       <Head>
