@@ -1,0 +1,25 @@
+{
+  "Product": {
+    "Specifications": "Specifications",
+    "Product Information": "Product Information",
+    "Buy": "Make order",
+    "Currency": "$",
+    "Full Name": "Full Name",
+    "Full Name Placeholder": "John Doe",
+    "Full Name Description": "Need to send a parcel",
+    "E-mail Address": "E-mail Address",
+    "E-mail Address Description": "To send you order details",
+    "Phone Number": "Phone Number",
+    "Phone Number Placeholder": "E.g., +1 650 513 0514",
+    "Phone Number Description": "In international format, to contact you",
+    "Referral Code": "Referral Code",
+    "Referral Code Placeholder": "Where are you come from?",
+    "Delivery Address": "Delivery Address",
+    "Delivery Address Placeholder": "Full postal delivery address",
+    "Delivery Address Description": "In international format, to send a parcel",
+    "Order completed": "Thank you! Order completed",
+    "Order completed Description": "We will contact you shortly",
+    "required": "is required",
+    "email": "must be a valid email"
+  }
+}

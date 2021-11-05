@@ -1,34 +1,105 @@
+/* Vendor */
+import { GetStaticPropsContext } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import Head from "next/head";
 
-const Home = () => (
-  <div className="container">
-    <Head>
-      <meta charSet="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+/* Components */
+import { Layout } from "@/components/Layout";
+import { Header } from "@/components/Header";
 
-      <title>Title</title>
+/* Utils */
+import { StrapiApiRequest, StrapiPageRepository } from "@/data/pages";
 
-      <meta name="description" content="Description" />
-      <meta property="og:title" content="Title" />
-      <meta property="og:description" content="Description" />
-      <meta property="og:image" content="https://www.mywebsite.com/image.jpg" />
-      <meta property="og:image:alt" content="Image alt" />
-      <meta property="og:locale" content="ru_RU" />
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta property="og:url" content="" />
+/* Types */
+import type { IndexPage } from "@/data/pages";
+import { Alert } from "@/components/Alert/Alert";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
-      <link rel="icon" href="/favicon.ico" />
-      {/* <!-- 32×32 -->*/}
-      <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-      {/*<!-- 512×512 -->*/}
-      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      {/*<!-- 180×180 -->*/}
-      <link rel="manifest" href="/manifest.webmanifest" />
-      <meta name="theme-color" content="#FF00FF" />
-    </Head>
-    <main></main>
-  </div>
-);
+type Props = {
+  page: IndexPage;
+  preview?: boolean;
+};
 
-export default Home;
+const HomePage = ({ page, preview }: Props) => {
+  useReferralCode();
+
+  return (
+    <Layout>
+      <Head>
+        <title>{page.title}</title>
+        <meta name="description" content={page.metaDescription} />
+      </Head>
+      {preview && (
+        <div className="p-4">
+          <Alert
+            title="Включен режим предпросмотра"
+            link={{
+              href: "/api/exit-preview",
+              text: "Нажмите сюда, чтобы выйти",
+            }}
+          />
+        </div>
+      )}
+      <Header navigationItems={page.navigationItems} />
+      <main className="container mx-auto">
+        <div className="relative bg-white overflow-hidden">
+          <div className="py-12 sm:py-24">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 sm:static sm:flex lg:flex-col-reverse">
+              <div className="mt-2 sm:mr-10 sm:mt-2 lg:mt-10 ">
+                <ul className="flex sm:flex-col lg:flex-row gap-10 mb-10">
+                  {page.featuredItems.map((featuredItem) => (
+                    <li key={featuredItem.url}>
+                      <Link href={featuredItem.url} passHref>
+                        <Image
+                          className="rounded-md max-w-7xl cursor-pointer"
+                          src={featuredItem.image.src}
+                          alt={featuredItem.image.alt}
+                          width={320}
+                          height={320}
+                        />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="sm:max-w-lg">
+                <h1 className="text-4xl font font-extrabold tracking-tight text-gray-900 sm:text-6xl">
+                  {page.heading}
+                </h1>
+                <p className="mt-4 text-xl text-gray-500">{page.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </Layout>
+  );
+};
+
+export default HomePage;
+
+export async function getStaticProps({ locale, preview }: GetStaticPropsContext) {
+  const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
+  const token = process.env.STRAPI_STATIC_TOKEN;
+  const request = new StrapiApiRequest({
+    apiUrl,
+    locale,
+    token,
+  });
+  const pages = new StrapiPageRepository(request);
+  const page = await pages.getIndexPage();
+
+  return {
+    props: {
+      // You can get the messages from anywhere you like, but the recommended
+      // pattern is to put them in JSON files separated by language and read
+      // the desired one based on the `locale` received from Next.js.
+      messages: {
+        ...require(`../messages/shared/${locale}.json`),
+      },
+      page,
+      preview: preview ?? false,
+    },
+  };
+}
