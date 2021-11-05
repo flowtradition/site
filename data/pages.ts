@@ -32,7 +32,6 @@ export type ProductImage = {
 
 export type Product = {
   readonly slug: string;
-  readonly categorySlug: string;
   readonly name: string;
   readonly description: string;
   readonly price: number;
@@ -42,7 +41,7 @@ export type Product = {
   readonly features: Feature[];
 };
 
-export type ProductCategory = {
+export type StoreProduct = {
   readonly id: number;
   readonly name: string;
   readonly href: string;
@@ -77,10 +76,10 @@ export interface IndexPage extends Page {
   readonly featuredItems: FeaturedItem[];
 }
 
-export interface CategoryPage extends Page {
+export interface StorePage extends Page {
   readonly heading: string;
   readonly description: string;
-  readonly categoryProducts: ProductCategory[];
+  readonly products: StoreProduct[];
 }
 
 export interface ProductPage extends Page {
@@ -91,7 +90,7 @@ export interface ProductPage extends Page {
 
 interface PageRepository {
   getIndexPage(): Promise<IndexPage>;
-  getCategoryPage(slug: string): Promise<CategoryPage>;
+  getStorePage(): Promise<StorePage>;
   getProductPage(slug: string): Promise<ProductPage>;
 }
 
@@ -106,21 +105,6 @@ type StrapiImage = {
       url: string;
     };
   };
-};
-
-type StrapiCategory = {
-  title: string;
-  meta_description: string;
-  slug: string;
-  name: string;
-  description: string;
-  image: StrapiImage;
-  heading: string;
-};
-
-type StrapiPartner = {
-  name: string;
-  code: string;
 };
 
 type StrapiFeatureComponent = {
@@ -153,12 +137,19 @@ type StrapiProduct = {
   description: string;
   main_image: StrapiImage;
   images: StrapiImage[];
-  category: StrapiCategory;
   features: StrapiFeatureComponent[];
   options: StrapiOptionComponent[];
 };
 
 type StrapiIndexPage = {
+  title: string;
+  meta_description: string;
+  heading: string;
+  description: string;
+};
+
+type StrapiStorePage = {
+  name: string;
   title: string;
   meta_description: string;
   heading: string;
@@ -173,14 +164,14 @@ export class StrapiPageRepository implements PageRepository {
   }
 
   private async getNavigationItems(): Promise<NavItem[]> {
-    const data = await this.request.getRequestJson<StrapiCategory[]>("categories");
+    const { name } = await this.request.getRequestJson<StrapiStorePage>("store-page");
 
-    return data.map((item) => {
-      return {
-        url: `/store/${item.slug}`,
-        title: item.name,
-      };
-    });
+    return [
+      {
+        url: "/store",
+        title: name,
+      },
+    ];
   }
 
   async getIndexPage(): Promise<IndexPage> {
@@ -202,27 +193,22 @@ export class StrapiPageRepository implements PageRepository {
     };
   }
 
-  async getCategoryPage(slug: string): Promise<CategoryPage> {
-    const response = await this.request.getRequestJson<StrapiCategory[]>("categories", {
-      slug,
-    });
-    const data = response.shift();
+  async getStorePage(): Promise<StorePage> {
+    const { title, meta_description, heading, description } = await this.request.getRequestJson<StrapiStorePage>(
+      "store-page"
+    );
 
     const page = {
-      title: data.title,
-      metaDescription: data.meta_description,
+      title,
+      metaDescription: meta_description,
       navigationItems: await this.getNavigationItems(),
     };
 
-    const products = await this.request.getRequestJson<StrapiProduct[]>("products", {
-      _where: {
-        "category.slug": slug,
-      },
-    });
-    const categoryProducts = products.map((product) => {
+    const data = await this.request.getRequestJson<StrapiProduct[]>("products");
+    const products = data.map((product) => {
       return {
         id: product.id,
-        href: `/store/${slug}/${product.slug}`,
+        href: `/store/${product.slug}`,
         name: product.name,
         image: {
           src: `${this.request.apiUrl}${product.main_image.formats.small.url}`,
@@ -234,9 +220,9 @@ export class StrapiPageRepository implements PageRepository {
 
     return {
       ...page,
-      heading: data.heading,
-      description: data.description,
-      categoryProducts,
+      heading,
+      description,
+      products,
     };
   }
 
@@ -269,16 +255,15 @@ export class StrapiPageRepository implements PageRepository {
       };
     });
 
-    const features = data.features.map((feature) => {
+    const features = data.features.map(({ name, description }) => {
       return {
-        name: feature.name,
-        description: feature.description,
+        name,
+        description,
       };
     });
 
     const product: Product = {
       slug: data.slug,
-      categorySlug: data.category.slug,
       name: data.name,
       description: data.description,
       price: data.price,
@@ -308,8 +293,7 @@ export class StrapiPageRepository implements PageRepository {
 }
 
 interface SlugsRepository {
-  getCategorySlugs(): Promise<string[]>;
-  getProductSlugs(): Promise<{ category: string; product: string }[]>;
+  getProductSlugs(): Promise<{ product: string }[]>;
 }
 
 class StrapiSlugsRepository implements SlugsRepository {
@@ -319,18 +303,11 @@ class StrapiSlugsRepository implements SlugsRepository {
     this.request = request;
   }
 
-  async getCategorySlugs(): Promise<string[]> {
-    const data = await this.request.getRequestJson<StrapiCategory[]>("categories");
-
-    return data.map((item) => item.slug);
-  }
-
-  async getProductSlugs(): Promise<{ category: string; product: string }[]> {
+  async getProductSlugs(): Promise<{ product: string }[]> {
     const data = await this.request.getRequestJson<StrapiProduct[]>("products");
 
-    return data.map(({ slug, category }) => {
+    return data.map(({ slug }) => {
       return {
-        category: category.slug,
         product: slug,
       };
     });

@@ -13,8 +13,9 @@ import { Header } from "@/components/Header";
 import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@/data/pages";
 
 /* Types */
-import type { CategoryPage as CategoryPageType } from "@/data/pages";
+import type { StorePage as CategoryPageType } from "@/data/pages";
 import { Alert } from "@/components/Alert/Alert";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
 type Props = {
   page: CategoryPageType;
@@ -25,6 +26,7 @@ const CategoryPage = ({ page, preview }: Props) => {
   const router = useRouter();
   const t = useTranslations("Shared");
   const { isFallback } = router;
+  useReferralCode();
 
   if (isFallback) {
     return t("Loading...");
@@ -56,7 +58,7 @@ const CategoryPage = ({ page, preview }: Props) => {
             </h1>
             <p className="max-w-2xl mb-12 mx-auto text-center text-gray-600">{page.description}</p>
             <div className="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-              {page.categoryProducts.map((product) => (
+              {page.products.map((product) => (
                 <div key={product.href} className="group relative">
                   <div className="w-full min-h-80 bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none">
                     <img
@@ -76,7 +78,10 @@ const CategoryPage = ({ page, preview }: Props) => {
                         </Link>
                       </h3>
                     </div>
-                    <p className="text-sm font-medium text-gray-900">{product.price}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {product.price}
+                      {t("Currency")}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -93,39 +98,15 @@ export default CategoryPage;
 const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 const token = process.env.STRAPI_STATIC_TOKEN;
 
-// This function gets called at build time
-export async function getStaticPaths({ locales }: GetStaticPathsContext) {
-  const paths = [];
-
-  for (const locale of locales) {
-    const request = new StrapiApiRequest({
-      apiUrl,
-      locale,
-      token,
-    });
-    const repository = new StrapiSlugsRepository(request);
-    const slugs = await repository.getCategorySlugs();
-
-    slugs.forEach((slug) => paths.push({ params: { category: slug }, locale }));
-  }
-
-  return {
-    paths,
-    fallback: false,
-  };
-}
-
 // This also gets called at build time
-export async function getStaticProps({ locale, params, preview }: GetStaticPropsContext) {
+export async function getStaticProps({ locale, preview }: GetStaticPropsContext) {
   const request = new StrapiApiRequest({
     apiUrl,
     locale,
     token,
   });
   const pages = new StrapiPageRepository(request);
-
-  const slug = params.category as string;
-  const page = await pages.getCategoryPage(slug);
+  const page = await pages.getStorePage();
 
   return {
     props: {
@@ -134,7 +115,7 @@ export async function getStaticProps({ locale, params, preview }: GetStaticProps
       // pattern is to put them in JSON files separated by language and read
       // the desired one based on the `locale` received from Next.js.
       messages: {
-        ...require(`../../messages/shared/${locale}.json`),
+        ...require(`@/messages/shared/${locale}.json`),
       },
       preview: preview ?? false,
     },
