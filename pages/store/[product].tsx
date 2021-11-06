@@ -140,36 +140,44 @@ const ProductPage = ({ page, preview, locale }: Props) => {
               <div className="pt-6">
                 {/* Image gallery */}
                 <div className="mt-6 max-w-2xl mx-auto sm:px-6 lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-3 lg:gap-x-8">
-                  <div className="hidden aspect-w-3 aspect-h-4 rounded-lg overflow-hidden lg:block">
-                    <img
-                      src={page.images[0].src}
-                      alt={page.images[0].alt}
-                      className="w-full h-full object-center object-cover"
-                    />
-                  </div>
+                  {page.images[0] && (
+                    <div className="hidden aspect-w-3 aspect-h-4 rounded-lg overflow-hidden lg:block">
+                      <img
+                        src={page.images[0].src}
+                        alt={page.images[0].alt}
+                        className="w-full h-full object-center object-cover"
+                      />
+                    </div>
+                  )}
                   <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
-                    <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
+                    {page.images[1] && (
+                      <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
+                        <img
+                          src={page.images[1].src}
+                          alt={page.images[1].alt}
+                          className="w-full h-full object-center object-cover"
+                        />
+                      </div>
+                    )}
+                    {page.images[2] && (
+                      <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
+                        <img
+                          src={page.images[2].src}
+                          alt={page.images[2].alt}
+                          className="w-full h-full object-center object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {page.images[3] && (
+                    <div className="aspect-w-4 aspect-h-5 sm:rounded-lg sm:overflow-hidden lg:aspect-w-3 lg:aspect-h-4">
                       <img
-                        src={page.images[1].src}
-                        alt={page.images[1].alt}
+                        src={page.images[3].src}
+                        alt={page.images[3].alt}
                         className="w-full h-full object-center object-cover"
                       />
                     </div>
-                    <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
-                      <img
-                        src={page.images[2].src}
-                        alt={page.images[2].alt}
-                        className="w-full h-full object-center object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div className="aspect-w-4 aspect-h-5 sm:rounded-lg sm:overflow-hidden lg:aspect-w-3 lg:aspect-h-4">
-                    <img
-                      src={page.images[3].src}
-                      alt={page.images[3].alt}
-                      className="w-full h-full object-center object-cover"
-                    />
-                  </div>
+                  )}
                 </div>
 
                 {/* Product info */}
@@ -287,20 +295,22 @@ const ProductPage = ({ page, preview, locale }: Props) => {
                       </div>
                     </div>
 
-                    <div className="mt-8">
-                      <h2 className="text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl">
-                        {t("Specifications")}
-                      </h2>
+                    {page.product.features.length > 0 && (
+                      <div className="mt-8">
+                        <h2 className="text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl">
+                          {t("Specifications")}
+                        </h2>
 
-                      <dl className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-y-16 lg:gap-x-8">
-                        {page.product.features.map((feature) => (
-                          <div key={feature.name} className="border-t border-gray-200 pt-4">
-                            <dt className="font-medium text-gray-900">{feature.name}</dt>
-                            <dd className="mt-2 text-sm text-gray-500">{feature.description}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </div>
+                        <dl className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-y-16 lg:gap-x-8">
+                          {page.product.features.map((feature) => (
+                            <div key={feature.name} className="border-t border-gray-200 pt-4">
+                              <dt className="font-medium text-gray-900">{feature.name}</dt>
+                              <dd className="mt-2 text-sm text-gray-500">{feature.description}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
