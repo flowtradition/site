@@ -17,6 +17,7 @@
     "paths": {
       "@/data/*": ["data/*"],
       "@/components/*": ["components/*"],
+      "@/components": ["components/index"],
       "@/hooks/*": ["hooks/*"],
       "@/messages/*": ["messages/*"],
       "@/styles/*": ["styles/*"],

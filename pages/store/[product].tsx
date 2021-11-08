@@ -8,21 +8,15 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 /* Components */
-import { Layout } from "@/components/Layout";
-import { Header } from "@/components/Header";
-import { Option } from "@/components/Option/Option";
+import { Layout, Header, Option, Input, Textarea, Feedback, Alert, ImageGallery } from "@/components";
 
 /* Utils */
 import { classNames } from "@/utils/class-names";
 import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@/data/pages";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
 /* Types */
 import type { ProductPage as ProductPageType } from "@/data/pages";
-import { useReferralCode } from "@/hooks/useReferralCode";
-import { Input } from "@/components/Input/Input";
-import { Textarea } from "@/components/Textarea/Textarea";
-import { Feedback } from "@/components/Feedback/Feedback";
-import { Alert } from "@/components/Alert/Alert";
 
 type FormData = {
   fullName: string;
@@ -139,46 +133,7 @@ const ProductPage = ({ page, preview, locale }: Props) => {
             <div className="bg-white">
               <div className="pt-6">
                 {/* Image gallery */}
-                <div className="mt-6 max-w-2xl mx-auto sm:px-6 lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-3 lg:gap-x-8">
-                  {page.images[0] && (
-                    <div className="hidden aspect-w-3 aspect-h-4 rounded-lg overflow-hidden lg:block">
-                      <img
-                        src={page.images[0].src}
-                        alt={page.images[0].alt}
-                        className="w-full h-full object-center object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="hidden lg:grid lg:grid-cols-1 lg:gap-y-8">
-                    {page.images[1] && (
-                      <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
-                        <img
-                          src={page.images[1].src}
-                          alt={page.images[1].alt}
-                          className="w-full h-full object-center object-cover"
-                        />
-                      </div>
-                    )}
-                    {page.images[2] && (
-                      <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
-                        <img
-                          src={page.images[2].src}
-                          alt={page.images[2].alt}
-                          className="w-full h-full object-center object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  {page.images[3] && (
-                    <div className="aspect-w-4 aspect-h-5 sm:rounded-lg sm:overflow-hidden lg:aspect-w-3 lg:aspect-h-4">
-                      <img
-                        src={page.images[3].src}
-                        alt={page.images[3].alt}
-                        className="w-full h-full object-center object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
+                <ImageGallery images={page.images} />
 
                 {/* Product info */}
                 <div className="max-w-2xl mx-auto pt-10 pb-8 px-4 sm:px-6 lg:max-w-7xl lg:pt-16 lg:pb-16 lg:px-8 lg:grid lg:grid-cols-4 lg:grid-rows-[auto,auto,1fr] lg:gap-x-8">
