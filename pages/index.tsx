@@ -1,20 +1,19 @@
 /* Vendor */
-import { GetStaticPropsContext } from "next";
+
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
 
 /* Components */
-import { Layout } from "@/components/Layout";
-import { Header } from "@/components/Header";
+import { Layout, Header, Alert } from "@/components";
 
 /* Utils */
 import { StrapiApiRequest, StrapiPageRepository } from "@/data/pages";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
 /* Types */
+import type { GetStaticPropsContext } from "next";
 import type { IndexPage } from "@/data/pages";
-import { Alert } from "@/components/Alert/Alert";
-import { useReferralCode } from "@/hooks/useReferralCode";
 
 type Props = {
   page: IndexPage;
@@ -96,7 +95,7 @@ export async function getStaticProps({ locale, preview }: GetStaticPropsContext)
       // pattern is to put them in JSON files separated by language and read
       // the desired one based on the `locale` received from Next.js.
       messages: {
-        ...require(`../messages/shared/${locale}.json`),
+        ...require(`@/messages/shared/${locale}.json`),
       },
       page,
       preview: preview ?? false,

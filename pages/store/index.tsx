@@ -1,21 +1,19 @@
 /* Vendor */
-import { GetStaticPathsContext, GetStaticPropsContext } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
 
 /* Components */
-import { Layout } from "@/components/Layout";
-import { Header } from "@/components/Header";
+import { Layout, Header, Alert } from "@/components";
 
 /* Utils */
-import { StrapiApiRequest, StrapiPageRepository, StrapiSlugsRepository } from "@/data/pages";
+import { StrapiApiRequest, StrapiPageRepository } from "@/data/pages";
+import { useReferralCode } from "@/hooks/useReferralCode";
 
 /* Types */
+import type { GetStaticPropsContext } from "next";
 import type { StorePage as CategoryPageType } from "@/data/pages";
-import { Alert } from "@/components/Alert/Alert";
-import { useReferralCode } from "@/hooks/useReferralCode";
 
 type Props = {
   page: CategoryPageType;
