@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import { NextIntlProvider } from "next-intl";
+import Script from "next/script";
 import type { AppProps /*, AppContext */ } from "next/app";
 import { useProgress } from "@/hooks/useProgress";
 
@@ -8,6 +9,23 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <NextIntlProvider messages={pageProps.messages}>
+      <Script
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+    (function(d, w, c) {
+        w.ChatraID = 'gKidEuxPkwGCcuuAK';
+        var s = d.createElement('script');
+        w[c] = w[c] || function() {
+            (w[c].q = w[c].q || []).push(arguments);
+        };
+        s.async = true;
+        s.src = 'https://call.chatra.io/chatra.js';
+        if (d.head) d.head.appendChild(s);
+    })(document, window, 'Chatra');
+  `,
+        }}
+      />
       <Component {...pageProps} />
     </NextIntlProvider>
   );
